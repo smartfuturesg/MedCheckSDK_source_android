@@ -1,0 +1,10 @@
+<resources>
+    <string name="app_name">MedCheckSdk</string>
+    <string name="device_name">Device Name</string>
+    <string name="status">Status</string>
+    <string name="read_data">Read Data</string>
+    <string name="time_sync">Time Sync</string>
+    <string name="clear_data">Clear Data</string>
+    <string name="disconnect">Disconnect</string>
+    <string name="connect">Connect</string>
+</resources>

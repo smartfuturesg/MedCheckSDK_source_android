@@ -1,0 +1,20 @@
+<resources>
+    <string name="app_name">MedCheck Lib</string>
+
+    <string name="measuring_blood_pressure">Measuring Blood Pressure</string>
+    <string name="measuring_blood_glucose">Measuring Blood Glucose</string>
+
+    <string name="permission_label">Permission</string>
+    <string name="permission_message">App required location permission for scanning devices</string>
+    <string name="permission_setting_message">Allow app to access your location. It is required for scanning devices,
+        Tap Setting > Permissions > and turn Location on</string>
+
+    <string name="bluetooth_enable_dialog_label">Bluetooth</string>
+    <string name="bluetooth_enable_dialog_message">Enable your Bluetooth for scan device</string>
+
+    <string name="dialog_label_setting">Setting</string>
+    <string name="dialog_label_allow">Allow</string>
+    <string name="dialog_label_cancel">Cancel</string>
+    <string name="dialog_label_enable">Enable</string>
+
+</resources>
