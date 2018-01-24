@@ -2,6 +2,7 @@ package com.getmedcheck.lib;
 
 import android.content.Context;
 
+import com.getmedcheck.lib.constant.Constants;
 import com.getmedcheck.lib.events.EventBleScanResult;
 import com.getmedcheck.lib.events.EventClearCommand;
 import com.getmedcheck.lib.events.EventDeviceConnectionStatus;
@@ -66,11 +67,12 @@ public class MedCheck {
         }
     }
 
-    public void unregisterCallBack() {
+    public void unregisterCallBack(Context context) {
         mCallback = null;
         if (EventBus.getDefault().isRegistered(this)) {
             EventBus.getDefault().unregister(this);
         }
+        MedCheckBluetoothLeService.stopBluetoothLeService(context.getApplicationContext());
     }
 
     /************************** Callback *************************/

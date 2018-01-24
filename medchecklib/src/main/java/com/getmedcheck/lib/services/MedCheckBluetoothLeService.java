@@ -53,6 +53,7 @@ public class MedCheckBluetoothLeService extends Service {
     private static final String TAG = MedCheckBluetoothLeService.class.getSimpleName();
     private static final String ACTION_START_SCAN = "com.getmedcheck.lib.services.ACTION_START_SCAN";
     private static final String ACTION_STOP_SCAN = "com.getmedcheck.lib.services.ACTION_STOP_SCAN";
+    private static final String ACTION_STOP_SERVICE = "com.getmedcheck.lib.services.ACTION_STOP_SERVICE";
     private static final String ACTION_DISCONNECT = "com.getmedcheck.lib.services.ACTION_DISCONNECT";
     private static final String ACTION_CONNECT_DEVICE_USING_MAC = "com.getmedcheck.lib.services.ACTION_CONNECT_DEVICE_USING_MAC";
     private static final String ACTION_WRITE_CHARACTERISTICS_USING_MAC = "com.getmedcheck.lib.services.ACTION_WRITE_CHARACTERISTICS_USING_MAC";
@@ -89,6 +90,12 @@ public class MedCheckBluetoothLeService extends Service {
     public static void stopBluetoothLeScan(Context context) {
         Intent intent = new Intent(context, MedCheckBluetoothLeService.class);
         intent.setAction(ACTION_STOP_SCAN);
+        context.startService(intent);
+    }
+
+    public static void stopBluetoothLeService(Context context) {
+        Intent intent = new Intent(context, MedCheckBluetoothLeService.class);
+        intent.setAction(ACTION_STOP_SERVICE);
         context.startService(intent);
     }
 
@@ -176,6 +183,10 @@ public class MedCheckBluetoothLeService extends Service {
                     break;
                 case ACTION_STOP_SCAN:
                     stopScan();
+                    break;
+                case ACTION_STOP_SERVICE:
+                    stopScan();
+                    disconnectDevice();
                     stopSelf();
                     break;
                 case ACTION_DISCONNECT:

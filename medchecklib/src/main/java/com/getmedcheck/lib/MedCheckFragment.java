@@ -305,7 +305,7 @@ public abstract class MedCheckFragment extends Fragment {
     @Override
     public void onDetach() {
         super.onDetach();
-        MedCheck.getInstance().unregisterCallBack();
+        MedCheck.getInstance().unregisterCallBack(getActivity());
     }
 
     public void enableGps() {

@@ -366,4 +366,9 @@ public abstract class MedCheckActivity extends AppCompatActivity {
     protected void onDeviceConnectionStateChange(BleDevice bleDevice, int status) {
     }
 
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        MedCheck.getInstance().unregisterCallBack(this);
+    }
 }
