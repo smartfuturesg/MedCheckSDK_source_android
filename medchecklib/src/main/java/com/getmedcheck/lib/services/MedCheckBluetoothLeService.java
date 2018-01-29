@@ -73,6 +73,7 @@ public class MedCheckBluetoothLeService extends Service {
     // clear command
     private CountDownTimer mCountDownTimerClear;
     private String mDeviceMacAddress = "";
+    private String mReConnectDeviceMacAddress = "";
     private String bt9Data = "";
 
     private BroadcastReceiver mBluetoothOnOffReceiver;
@@ -315,7 +316,8 @@ public class MedCheckBluetoothLeService extends Service {
                 if (!TextUtils.isEmpty(mDeviceMacAddress)) {
                     if (!TextUtils.isEmpty(result.getDevice().getAddress()) && result.getDevice().getAddress().equals(mDeviceMacAddress)) {
                         BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mDeviceMacAddress);
-                        if (device != null) {
+                        if (device != null && !TextUtils.isEmpty(mReConnectDeviceMacAddress) && mDeviceMacAddress.equalsIgnoreCase(mReConnectDeviceMacAddress)) {
+                            mReConnectDeviceMacAddress = "";
                             connectBluetoothLeDevice(device);
                         }
                     }
@@ -657,6 +659,7 @@ public class MedCheckBluetoothLeService extends Service {
 
                // restart scan so device connect
                 startScan();
+                mReConnectDeviceMacAddress = mDeviceMacAddress;
 
             }
 
