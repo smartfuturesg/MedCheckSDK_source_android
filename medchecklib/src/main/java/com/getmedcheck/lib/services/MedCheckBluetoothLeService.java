@@ -626,8 +626,13 @@ public class MedCheckBluetoothLeService extends Service {
 
                 stopScan();
 
-                gatt.discoverServices();
 
+                try {
+                    Thread.sleep(1000);
+                    gatt.discoverServices();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
 
             } else {
                 // remove connected device
@@ -635,6 +640,7 @@ public class MedCheckBluetoothLeService extends Service {
 
                 if (!AppData.getInstance().isLiveReading()) {
                     EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.DISCONNECTED, "Disconnected"));
+
                 } else {
                     mReConnectDeviceMacAddress = mDeviceMacAddress;
                 }
@@ -655,7 +661,13 @@ public class MedCheckBluetoothLeService extends Service {
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             super.onServicesDiscovered(gatt, status);
             if (status == BluetoothGatt.GATT_SUCCESS) {
-                listServices(gatt);
+
+                try {
+                    Thread.sleep(500);
+                    listServices(gatt);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
 
