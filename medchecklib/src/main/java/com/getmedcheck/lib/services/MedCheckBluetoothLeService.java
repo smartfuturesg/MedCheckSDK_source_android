@@ -248,20 +248,19 @@ public class MedCheckBluetoothLeService extends Service {
         }
     }
 
-    private void connectBluetoothLeDevice(final BluetoothDevice bluetoothDevice) {
-        // MUST! disconnect and close previously connected GATT
-        // because when you second time connect without disconnecting gatt callback methods call increment every time
-        // ex: first time onDataReadingStateChange is called 1 time, second time it is called two times and so on.
 
-        final Handler handler1 = new Handler();
-        handler1.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (AppData.getInstance().getConnectedDeviceGhatt().size() > 0) {
-                    disconnectDevice();
-                }
+    private void disconnectDeviceBeforeConnection(final BluetoothDevice bluetoothDevice) {
+
+        if (AppData.getInstance().getConnectedDeviceGhatt().size() > 0) {
+            ArrayList<BluetoothGatt> bluetoothGatts = new ArrayList<>(AppData.getInstance().getConnectedDeviceGhatt());
+            for (BluetoothGatt bluetoothGatt : bluetoothGatts) {
+                bluetoothGatt.disconnect();
             }
-        }, 100);
+
+            AppData.getInstance().clearConnectedGhattList();
+        } else if (mBluetoothGatt != null) {
+            mBluetoothGatt.disconnect();
+        }
 
         final Handler handler2 = new Handler();
         handler2.postDelayed(new Runnable() {
@@ -275,7 +274,35 @@ public class MedCheckBluetoothLeService extends Service {
 
                 AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
             }
-        }, 500);
+        }, 5000);
+
+        EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.CONNECTING, "Connecting"));
+    }
+
+    private void connectBluetoothLeDevice(final BluetoothDevice bluetoothDevice) {
+        // MUST! disconnect and close previously connected GATT
+        // because when you second time connect without disconnecting gatt callback methods call increment every time
+        // ex: first time onDataReadingStateChange is called 1 time, second time it is called two times and so on.
+
+
+        if (AppData.getInstance().getConnectedDeviceGhatt().size() > 0) {
+            disconnectDeviceBeforeConnection(bluetoothDevice);
+            return;
+        }
+
+        final Handler handler2 = new Handler();
+        handler2.postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback(), BluetoothDevice.TRANSPORT_LE);
+                } else {
+                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback());
+                }
+
+                AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
+            }
+        }, 1000);
 
         EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.CONNECTING, "Connecting"));
     }
@@ -291,6 +318,21 @@ public class MedCheckBluetoothLeService extends Service {
         if (mScanCallback == null) {
             initScanCallback();
             scanner.startScan(mScanCallback);
+        }
+    }
+
+    private void startScanWithDelay() {
+        if (mScanCallback == null) {
+            initScanCallback();
+
+            final Handler handler2 = new Handler(Looper.getMainLooper());
+            handler2.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    scanner.startScan(mScanCallback);
+                }
+            }, 5000);
+
         }
     }
 
@@ -569,9 +611,11 @@ public class MedCheckBluetoothLeService extends Service {
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             super.onConnectionStateChange(gatt, status, newState);
+
             EventBus.getDefault().post(new EventBleConnectionState(gatt, status, newState));
 
             AppData appData = AppData.getInstance();
+
             BleDevice bleDevice = new BleDevice(gatt.getDevice(), Constants.BLE_STATUS_CONNECTED);
 
             if (newState == BluetoothProfile.STATE_CONNECTED) {
@@ -579,14 +623,20 @@ public class MedCheckBluetoothLeService extends Service {
                 appData.addConnectedDevice(bleDevice);
 
                 EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.CONNECTED, "Connected"));
-                gatt.discoverServices();
+
                 stopScan();
+
+                gatt.discoverServices();
+
+
             } else {
-                // store connected device
+                // remove connected device
                 appData.removeConnectedDevice(bleDevice);
 
                 if (!AppData.getInstance().isLiveReading()) {
                     EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.DISCONNECTED, "Disconnected"));
+                } else {
+                    mReConnectDeviceMacAddress = mDeviceMacAddress;
                 }
 
                 if (gatt != null) {
@@ -657,8 +707,11 @@ public class MedCheckBluetoothLeService extends Service {
 
                 EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.NEW_READING, message));
 
-               // restart scan so device connect
-                startScan();
+
+                disconnectDevice();
+                // restart scan so device connect
+                startScanWithDelay();
+
                 mReConnectDeviceMacAddress = mDeviceMacAddress;
 
             }
