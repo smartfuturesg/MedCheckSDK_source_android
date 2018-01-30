@@ -646,7 +646,6 @@ public class MedCheckBluetoothLeService extends Service {
                 appData.removeConnectedDevice(bleDevice);
 
                 if (!AppData.getInstance().isLiveReading()) {
-                    EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.DISCONNECTED, "Disconnected"));
 
                     if (status == 133 && newState == 0
                             && !TextUtils.isEmpty(mDeviceMacAddress) && !TextUtils.isEmpty(mAction)
@@ -658,6 +657,8 @@ public class MedCheckBluetoothLeService extends Service {
                                 connectBluetoothLeDevice(device);
                             }
                         }
+                    } else {
+                        EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.DISCONNECTED, "Disconnected"));
                     }
 
                 } else {
