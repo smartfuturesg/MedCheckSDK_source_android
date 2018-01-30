@@ -75,6 +75,7 @@ public class MedCheckBluetoothLeService extends Service {
     private String mDeviceMacAddress = "";
     private String mReConnectDeviceMacAddress = "";
     private String bt9Data = "";
+    private String mAction = "";
 
     private BroadcastReceiver mBluetoothOnOffReceiver;
 
@@ -180,20 +181,25 @@ public class MedCheckBluetoothLeService extends Service {
             mDeviceMacAddress = "";
             switch (intent.getAction()) {
                 case ACTION_START_SCAN:
+                    mAction = ACTION_START_SCAN;
                     startScan();
                     break;
                 case ACTION_STOP_SCAN:
+                    mAction = ACTION_STOP_SCAN;
                     stopScan();
                     break;
                 case ACTION_STOP_SERVICE:
+                    mAction = ACTION_STOP_SERVICE;
                     stopScan();
                     disconnectDevice();
                     stopSelf();
                     break;
                 case ACTION_DISCONNECT:
+                    mAction = ACTION_DISCONNECT;
                     disconnectDevice();
                     break;
                 case ACTION_CONNECT_DEVICE_USING_MAC:
+                    mAction = ACTION_CONNECT_DEVICE_USING_MAC;
                     mDeviceMacAddress = intent.getStringExtra(DEVICE_MAC_ADDRESS);
                     if (!TextUtils.isEmpty(mDeviceMacAddress)) {
                         BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mDeviceMacAddress);
@@ -203,12 +209,14 @@ public class MedCheckBluetoothLeService extends Service {
                     }
                     break;
                 case ACTION_WRITE_CHARACTERISTICS_USING_MAC:
+                    mAction = ACTION_WRITE_CHARACTERISTICS_USING_MAC;
                     mDeviceMacAddress = intent.getStringExtra(DEVICE_MAC_ADDRESS);
                     if (mBluetoothGatt != null) {
                         writeCharacteristicCommand(mBluetoothGatt, Constants.WRITE_CHARACTERISTICS_UUID, Constants.BLE_COMMAND_BT09);
                     }
                     break;
                 case ACTION_CLEAR_DEVICE_USING_MAC:
+                    mAction = ACTION_CLEAR_DEVICE_USING_MAC;
                     mDeviceMacAddress = intent.getStringExtra(DEVICE_MAC_ADDRESS);
                     if (mBluetoothGatt != null) {
                         // currently clear device is supported only in blood pressure device
@@ -218,6 +226,7 @@ public class MedCheckBluetoothLeService extends Service {
                         }
                     }
                 case ACTION_TIME_SYNC_USING_MAC:
+                    mAction = ACTION_TIME_SYNC_USING_MAC;
                     mDeviceMacAddress = intent.getStringExtra(DEVICE_MAC_ADDRESS);
                     if (mBluetoothGatt != null) {
                         // currently time sync is supported only in blood pressure device
@@ -262,19 +271,19 @@ public class MedCheckBluetoothLeService extends Service {
             mBluetoothGatt.disconnect();
         }
 
-        final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback(), BluetoothDevice.TRANSPORT_LE);
-                } else {
-                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback());
-                }
 
-                AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
+        try {
+            Thread.sleep(5000);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback(), BluetoothDevice.TRANSPORT_LE);
+            } else {
+                mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback());
             }
-        }, 5000);
+
+            AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.CONNECTING, "Connecting"));
     }
@@ -290,19 +299,18 @@ public class MedCheckBluetoothLeService extends Service {
             return;
         }
 
-        final Handler handler2 = new Handler();
-        handler2.postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback(), BluetoothDevice.TRANSPORT_LE);
-                } else {
-                    mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback());
-                }
-
-                AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
+        try {
+            Thread.sleep(1000);
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback(), BluetoothDevice.TRANSPORT_LE);
+            } else {
+                mBluetoothGatt = bluetoothDevice.connectGatt(MedCheckBluetoothLeService.this, false, new MyBluetoothGattCallback());
             }
-        }, 1000);
+
+            AppData.getInstance().addConnectedGhatt(mBluetoothGatt);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
 
         EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.CONNECTING, "Connecting"));
     }
@@ -325,13 +333,12 @@ public class MedCheckBluetoothLeService extends Service {
         if (mScanCallback == null) {
             initScanCallback();
 
-            final Handler handler2 = new Handler(Looper.getMainLooper());
-            handler2.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    scanner.startScan(mScanCallback);
-                }
-            }, 5000);
+            try {
+                Thread.sleep(5000);
+                scanner.startScan(mScanCallback);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
 
         }
     }
@@ -640,6 +647,18 @@ public class MedCheckBluetoothLeService extends Service {
 
                 if (!AppData.getInstance().isLiveReading()) {
                     EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.DISCONNECTED, "Disconnected"));
+
+                    if (status == 133 && newState == 0
+                            && !TextUtils.isEmpty(mDeviceMacAddress) && !TextUtils.isEmpty(mAction)
+                            && mAction.equalsIgnoreCase(ACTION_CONNECT_DEVICE_USING_MAC)) {
+
+                        if (!TextUtils.isEmpty(mDeviceMacAddress)) {
+                            BluetoothDevice device = BluetoothAdapter.getDefaultAdapter().getRemoteDevice(mDeviceMacAddress);
+                            if (device != null) {
+                                connectBluetoothLeDevice(device);
+                            }
+                        }
+                    }
 
                 } else {
                     mReConnectDeviceMacAddress = mDeviceMacAddress;
