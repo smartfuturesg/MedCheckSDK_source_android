@@ -871,7 +871,10 @@ public class MedCheckBluetoothLeService extends Service {
                             if (arrayList != null) {
                                 for (String hexString : arrayList) {
                                     Log.e(TAG, "onCharacteristicChanged() BGM hex = [" + hexString + "]");
-                                    bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
+                                    if (hexString.length()>=48) {
+                                        bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
+                                    }
+
                                 }
 
                                 int start = Integer.parseInt(bt9Data.substring(4, 6), 16);

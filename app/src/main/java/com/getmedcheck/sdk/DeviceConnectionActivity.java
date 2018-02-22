@@ -175,11 +175,11 @@ public class DeviceConnectionActivity extends MedCheckActivity implements View.O
 
                 DecimalFormat df = new DecimalFormat("0.0");
                 float val = 0;
-                if (StringUtils.isNumber(bloodGlucoseData.getLow())) {
-                    val = Float.parseFloat(bloodGlucoseData.getLow()) / 18f;
+                if (StringUtils.isNumber(bloodGlucoseData.getHigh())) {
+                    val = Float.parseFloat(bloodGlucoseData.getHigh()) / 18f;
                 }
 
-                stringBuilder.append(df.format(val)).append(" mmol/L (").append(bloodGlucoseData.getLow()).append(" mg/dL)\n");
+                stringBuilder.append(df.format(val)).append(" mmol/L (").append(bloodGlucoseData.getHigh()).append(" mg/dL)\n");
                 stringBuilder.append(bloodGlucoseData.getAcPcStringValue()).append("\n");
                 stringBuilder.append("DATE: ").append(sdf.format(bloodGlucoseData.getDateTime()));
                 stringBuilder.append("\n------------------------\n");
