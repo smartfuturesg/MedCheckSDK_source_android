@@ -845,16 +845,19 @@ public class MedCheckBluetoothLeService extends Service {
                 // data value
                 if (!hexVal.equals(Constants.BLE_HEADING_DATA) && !hexVal.equals(Constants.BLE_ENDING_DATA) && !hexVal.equals(Constants.BLE_EMPTY_DATA)) {
                     if (type.equals(Constants.TYPE_BPM)) {
-                        BloodPressureData bloodPressureData = new BloodPressureData(characteristic.getValue(), bt9Data);
-                        if (!bloodTestDataArrayList.contains(bloodPressureData)
-                                && Integer.parseInt(bloodPressureData.getSystolic()) != 0
-                                && Integer.parseInt(bloodPressureData.getDiastolic()) != 0
-                                && Integer.parseInt(bloodPressureData.getHeartRate()) != 0) {
+                        if (StringUtils.byteArrayToBinary(characteristic.getValue()).length()==64){
+                            BloodPressureData bloodPressureData = new BloodPressureData(characteristic.getValue(), bt9Data);
+                            if (!bloodTestDataArrayList.contains(bloodPressureData)
+                                    && Integer.parseInt(bloodPressureData.getSystolic()) != 0
+                                    && Integer.parseInt(bloodPressureData.getDiastolic()) != 0
+                                    && Integer.parseInt(bloodPressureData.getHeartRate()) != 0) {
 
-                            bloodTestDataArrayList.add(bloodPressureData);
-                            //Log.e(TAG, "onCharacteristicChanged() BPM hex = [" + StringUtils.getByteInStringForm(characteristic.getValue()) + "]");
-                            Log.e(TAG, "Print Data: " + bloodPressureData.getPrintData());
+                                bloodTestDataArrayList.add(bloodPressureData);
+                                //Log.e(TAG, "onCharacteristicChanged() BPM hex = [" + StringUtils.getByteInStringForm(characteristic.getValue()) + "]");
+                                Log.e(TAG, "Print Data: " + bloodPressureData.getPrintData());
+                            }
                         }
+
                     } else if (type.equals(Constants.TYPE_BGM)) {
                         // append data if bgm because bgm data length is 48 and bpm is 64
                         if (mStringBuilderBgm != null) {
@@ -871,10 +874,9 @@ public class MedCheckBluetoothLeService extends Service {
                             if (arrayList != null) {
                                 for (String hexString : arrayList) {
                                     Log.e(TAG, "onCharacteristicChanged() BGM hex = [" + hexString + "]");
-                                    if (hexString.length()>=48) {
-                                        bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
-                                    }
-
+                                   if (hexString.length()==48){
+                                       bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
+                                   }
                                 }
 
                                 int start = Integer.parseInt(bt9Data.substring(4, 6), 16);

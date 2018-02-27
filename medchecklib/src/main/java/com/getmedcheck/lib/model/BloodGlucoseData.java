@@ -134,8 +134,14 @@ public class BloodGlucoseData implements IDeviceData<BloodGlucoseData> {
         day = df.format(Integer.parseInt(binaryString.substring(16, 24), 2));
         acPc = binaryString.substring(24, 26);
         minute = df.format(Integer.parseInt(binaryString.substring(26, 32), 2));
-        low = "" + Integer.parseInt(binaryString.substring(32, 40), 2);
-        high = "" + Integer.parseInt(binaryString.substring(40, 48), 2);
+        int intLow = Integer.parseInt(binaryString.substring(32, 40), 2);
+        int intHigh = Integer.parseInt(binaryString.substring(40, 48), 2);
+
+        if (intLow !=0) {
+            intHigh = Integer.parseInt(binaryString.substring(32, 48), 2);
+        }
+        low = "" + intLow;
+        high = "" + intHigh;
 
         String builderDate = day + "-" +
                 month + "-" +

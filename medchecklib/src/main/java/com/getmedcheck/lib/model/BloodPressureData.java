@@ -130,10 +130,6 @@ public class BloodPressureData implements IDeviceData<BloodPressureData> {
 
     private void processData(String yearInitial) {
 
-        if (binaryString.length() < 64) {
-            return;
-        }
-
         int yearData = getYearData(yearInitial);
 
         DecimalFormat df = new DecimalFormat("00");
@@ -142,7 +138,12 @@ public class BloodPressureData implements IDeviceData<BloodPressureData> {
         month = df.format(Integer.parseInt(binaryString.substring(4, 8), 2));
         day = df.format(Integer.parseInt(binaryString.substring(8, 16), 2));
         amPm = "" + Integer.parseInt(binaryString.substring(16, 17), 2);
-        IHB = "" + Integer.parseInt(binaryString.substring(19, 20), 2);
+        int ihb = Integer.parseInt(binaryString.substring(19, 20), 2);
+        if (ihb==0) {
+            IHB = "00";
+        } else {
+            IHB = "10";
+        }
         hours = df.format(Integer.parseInt(binaryString.substring(20, 24), 2));
         minute = df.format(Integer.parseInt(binaryString.substring(24, 32), 2));
 
