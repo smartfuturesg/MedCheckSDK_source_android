@@ -718,6 +718,7 @@ public class MedCheckBluetoothLeService extends Service {
         public void onCharacteristicChanged(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic) {
 
             String hexVal = StringUtils.bytesToHex(characteristic.getValue());
+
             Log.e(TAG, "#onCharacteristicChanged: hexVal = " + hexVal + " ------ " + currentCharacteristics);
 
             // hex val 52 means start new reading
@@ -861,7 +862,9 @@ public class MedCheckBluetoothLeService extends Service {
                     } else if (type.equals(Constants.TYPE_BGM)) {
                         // append data if bgm because bgm data length is 48 and bpm is 64
                         if (mStringBuilderBgm != null) {
-                            mStringBuilderBgm.append(StringUtils.byteArrayToBinary(characteristic.getValue()));
+                            if (characteristic.getValue().length == 8 && StringUtils.byteArrayToBinary(characteristic.getValue()).length() == 64) {
+                                mStringBuilderBgm.append(StringUtils.byteArrayToBinary(characteristic.getValue()));
+                            }
                         }
                     }
                 }
