@@ -889,6 +889,9 @@ public class MedCheckBluetoothLeService extends Service {
                                     ArrayList<IDeviceData> bgmTestArrayList = new ArrayList<>();
                                     bgmTestArrayList.addAll(bloodTestDataArrayList.subList(start, end));
                                     bloodTestDataArrayList.clear();
+                                    if (((BloodGlucoseData)bgmTestArrayList.get(bgmTestArrayList.size()-1).getObject()).getHigh().contains("655")) {
+                                        bgmTestArrayList.remove(bgmTestArrayList.size()-1);
+                                    }
                                     bloodTestDataArrayList.addAll(bgmTestArrayList);
                                 }
                                 Log.e(TAG, "onCharacteristicChanged: Start -> " + start + " ,End -> " + end);
