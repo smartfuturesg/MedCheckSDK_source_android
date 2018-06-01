@@ -889,10 +889,12 @@ public class MedCheckBluetoothLeService extends Service {
                                     ArrayList<IDeviceData> bgmTestArrayList = new ArrayList<>();
                                     bgmTestArrayList.addAll(bloodTestDataArrayList.subList(start, end));
                                     bloodTestDataArrayList.clear();
-                                    if (((BloodGlucoseData)bgmTestArrayList.get(bgmTestArrayList.size()-1).getObject()).getHigh().contains("655")) {
-                                        bgmTestArrayList.remove(bgmTestArrayList.size()-1);
+                                    for (IDeviceData deviceData:bgmTestArrayList) {
+
+                                        if (!((BloodGlucoseData)deviceData.getObject()).getHigh().contains("655")) {
+                                            bloodTestDataArrayList.add(deviceData);
+                                        }
                                     }
-                                    bloodTestDataArrayList.addAll(bgmTestArrayList);
                                 }
                                 Log.e(TAG, "onCharacteristicChanged: Start -> " + start + " ,End -> " + end);
                             }
@@ -901,10 +903,10 @@ public class MedCheckBluetoothLeService extends Service {
                         int startIndex = getBpmUserStartIndex();
                         Log.e(TAG, "End Command: " + startIndex);
 
-                        ArrayList<IDeviceData> bgmTestArrayList = new ArrayList<>();
-                        bgmTestArrayList.addAll(bloodTestDataArrayList.subList(0, startIndex));
+                        ArrayList<IDeviceData> bpmTestArrayList = new ArrayList<>();
+                        bpmTestArrayList.addAll(bloodTestDataArrayList.subList(0, startIndex));
                         bloodTestDataArrayList.clear();
-                        bloodTestDataArrayList.addAll(bgmTestArrayList);
+                        bloodTestDataArrayList.addAll(bpmTestArrayList);
                     }
 
                     if (!bloodTestDataSend) {
@@ -913,6 +915,11 @@ public class MedCheckBluetoothLeService extends Service {
                         } else {
                             EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.NO_DATA_FOUND, "No data found in device."));
                         }
+
+                        if (((BloodGlucoseData)bloodTestDataArrayList.get(bloodTestDataArrayList.size()-1).getObject()).getHigh().contains("655")) {
+                            bloodTestDataArrayList.remove(bloodTestDataArrayList.size()-1);
+                        }
+
                         EventBus.getDefault().post(new EventDeviceData(gatt.getDevice(), bloodTestDataArrayList, type));
                         bloodTestDataSend = true;
                         AppData.getInstance().setLiveReading(false);
