@@ -777,6 +777,11 @@ public class MedCheckBluetoothLeService extends Service {
                         && !hexVal.equals(Constants.BLE_ENDING_DATA)
                         && !hexVal.equals(Constants.BLE_EMPTY_DATA)) {
                     bt9Data = hexVal;
+                    bloodTestDataSend = false;
+                    bloodTestDataArrayList.clear();
+                    if (mStringBuilderBgm.toString().length()>0) {
+                        mStringBuilderBgm.delete(0,mStringBuilderBgm.length());
+                    }
                 }
 
                 // if previous command is bt:9 and value result is its ending value then execute new command
@@ -838,9 +843,7 @@ public class MedCheckBluetoothLeService extends Service {
 
                 // start command
                 if (hexVal.equals(Constants.BLE_HEADING_DATA)) {
-                    bloodTestDataSend = false;
-                    bloodTestDataArrayList.clear();
-                    mStringBuilderBgm = new StringBuilder();
+
                 }
 
                 // data value
@@ -916,8 +919,10 @@ public class MedCheckBluetoothLeService extends Service {
                             EventBus.getDefault().post(new EventReadingProgress(EventReadingProgress.NO_DATA_FOUND, "No data found in device."));
                         }
 
-                        if (((BloodGlucoseData)bloodTestDataArrayList.get(bloodTestDataArrayList.size()-1).getObject()).getHigh().contains("655")) {
-                            bloodTestDataArrayList.remove(bloodTestDataArrayList.size()-1);
+                        if (type.equals(Constants.TYPE_BGM)) {
+                            if (bloodTestDataArrayList.size() > 0 && ((BloodGlucoseData) bloodTestDataArrayList.get(bloodTestDataArrayList.size() - 1).getObject()).getHigh().contains("655")) {
+                                bloodTestDataArrayList.remove(bloodTestDataArrayList.size() - 1);
+                            }
                         }
 
                         EventBus.getDefault().post(new EventDeviceData(gatt.getDevice(), bloodTestDataArrayList, type));
