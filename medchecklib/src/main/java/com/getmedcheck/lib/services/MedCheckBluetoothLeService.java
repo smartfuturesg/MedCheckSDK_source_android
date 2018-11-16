@@ -48,6 +48,10 @@ import no.nordicsemi.android.support.v18.scanner.BluetoothLeScannerCompat;
 import no.nordicsemi.android.support.v18.scanner.ScanCallback;
 import no.nordicsemi.android.support.v18.scanner.ScanResult;
 
+import static com.getmedcheck.lib.constant.Constants.BLOOD_GLUCOSE_DEVICE_ID_NEW;
+import static com.getmedcheck.lib.constant.Constants.BLOOD_GLUCOSE_SYNC_DEVICE_ID;
+import static com.getmedcheck.lib.constant.Constants.BLOOD_PRESSURE_DEVICE_ID_NEW;
+
 public class MedCheckBluetoothLeService extends Service {
 
     private static final String TAG = MedCheckBluetoothLeService.class.getSimpleName();
@@ -357,8 +361,8 @@ public class MedCheckBluetoothLeService extends Service {
                 if (result.getDevice().getName() != null) {
                     // if device name start with med check device name then
                     if (result.getDevice().getName().startsWith("HL") ||
-                            result.getDevice().getName().startsWith("SFBPBLE")
-                            || result.getDevice().getName().startsWith("SFBGBLE")) {
+                            result.getDevice().getName().startsWith(BLOOD_PRESSURE_DEVICE_ID_NEW)
+                            || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_DEVICE_ID_NEW) || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_SYNC_DEVICE_ID)) {
                         EventBus.getDefault().post(new EventBleScanResult(callbackType, result));
                     }
                 }
@@ -779,8 +783,8 @@ public class MedCheckBluetoothLeService extends Service {
                     bt9Data = hexVal;
                     bloodTestDataSend = false;
                     bloodTestDataArrayList.clear();
-                    if (mStringBuilderBgm.toString().length()>0) {
-                        mStringBuilderBgm.delete(0,mStringBuilderBgm.length());
+                    if (mStringBuilderBgm.toString().length() > 0) {
+                        mStringBuilderBgm.delete(0, mStringBuilderBgm.length());
                     }
                 }
 
@@ -849,7 +853,7 @@ public class MedCheckBluetoothLeService extends Service {
                 // data value
                 if (!hexVal.equals(Constants.BLE_HEADING_DATA) && !hexVal.equals(Constants.BLE_ENDING_DATA) && !hexVal.equals(Constants.BLE_EMPTY_DATA)) {
                     if (type.equals(Constants.TYPE_BPM)) {
-                        if (StringUtils.byteArrayToBinary(characteristic.getValue()).length()==64){
+                        if (StringUtils.byteArrayToBinary(characteristic.getValue()).length() == 64) {
                             BloodPressureData bloodPressureData = new BloodPressureData(characteristic.getValue(), bt9Data);
                             if (!bloodTestDataArrayList.contains(bloodPressureData)
                                     && Integer.parseInt(bloodPressureData.getSystolic()) != 0
@@ -880,9 +884,9 @@ public class MedCheckBluetoothLeService extends Service {
                             if (arrayList != null) {
                                 for (String hexString : arrayList) {
                                     Log.e(TAG, "onCharacteristicChanged() BGM hex = [" + hexString + "]");
-                                   if (hexString.length()==48){
-                                       bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
-                                   }
+                                    if (hexString.length() == 48) {
+                                        bloodTestDataArrayList.add(new BloodGlucoseData(hexString, bt9Data));
+                                    }
                                 }
 
                                 int start = Integer.parseInt(bt9Data.substring(4, 6), 16);
@@ -892,9 +896,9 @@ public class MedCheckBluetoothLeService extends Service {
                                     ArrayList<IDeviceData> bgmTestArrayList = new ArrayList<>();
                                     bgmTestArrayList.addAll(bloodTestDataArrayList.subList(start, end));
                                     bloodTestDataArrayList.clear();
-                                    for (IDeviceData deviceData:bgmTestArrayList) {
+                                    for (IDeviceData deviceData : bgmTestArrayList) {
 
-                                        if (!((BloodGlucoseData)deviceData.getObject()).getHigh().contains("655")) {
+                                        if (!((BloodGlucoseData) deviceData.getObject()).getHigh().contains("655")) {
                                             bloodTestDataArrayList.add(deviceData);
                                         }
                                     }
