@@ -51,6 +51,7 @@ import no.nordicsemi.android.support.v18.scanner.ScanResult;
 import static com.getmedcheck.lib.constant.Constants.BLOOD_GLUCOSE_DEVICE_ID_NEW;
 import static com.getmedcheck.lib.constant.Constants.BLOOD_GLUCOSE_SYNC_DEVICE_ID;
 import static com.getmedcheck.lib.constant.Constants.BLOOD_PRESSURE_DEVICE_ID_NEW;
+import static com.getmedcheck.lib.constant.Constants.ECG_DEVICE_ID;
 
 public class MedCheckBluetoothLeService extends Service {
 
@@ -362,7 +363,7 @@ public class MedCheckBluetoothLeService extends Service {
                     // if device name start with med check device name then
                     if (result.getDevice().getName().startsWith("HL") ||
                             result.getDevice().getName().startsWith(BLOOD_PRESSURE_DEVICE_ID_NEW)
-                            || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_DEVICE_ID_NEW) || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_SYNC_DEVICE_ID)) {
+                            || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_DEVICE_ID_NEW) || result.getDevice().getName().startsWith(BLOOD_GLUCOSE_SYNC_DEVICE_ID) || result.getDevice().getName().startsWith(ECG_DEVICE_ID)) {
                         EventBus.getDefault().post(new EventBleScanResult(callbackType, result));
                     }
                 }
